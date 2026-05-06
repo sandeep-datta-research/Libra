@@ -1,0 +1,91 @@
+export const services = [
+  {
+    id: "starter-growth",
+    category: "Follower Growth Package",
+    title: "Starter Growth",
+    description: "Boost your account visibility with a clean first lift for emerging profiles.",
+    quantity: "100 Growth Units",
+    price: 60,
+    eta: "12-24 hours",
+    highlight: false,
+    features: ["Beginner-safe pacing", "Visibility boost", "Manual quality check"],
+  },
+  {
+    id: "growth-boost",
+    category: "Follower Growth Package",
+    title: "Growth Boost",
+    description: "A stronger velocity package for creators who want momentum without looking artificial.",
+    quantity: "200 Growth Units",
+    price: 120,
+    eta: "12-24 hours",
+    highlight: true,
+    features: ["Most popular", "Balanced delivery", "Priority review lane"],
+  },
+  {
+    id: "engagement-lite",
+    category: "Engagement Package",
+    title: "Engagement Lite",
+    description: "Increase post activity with a lightweight engagement pack built for social proof.",
+    quantity: "100 Engagement Units",
+    price: 40,
+    eta: "6-18 hours",
+    highlight: false,
+    features: ["Story-safe boost", "Fast verification", "Premium support"],
+  },
+  {
+    id: "creator-surge",
+    category: "Follower Growth Package",
+    title: "Creator Surge",
+    description: "Higher-volume growth for launches, promos, and profile refresh campaigns.",
+    quantity: "500 Growth Units",
+    price: 260,
+    eta: "24-36 hours",
+    highlight: false,
+    features: ["Campaign-ready", "Priority queue", "Operations monitoring"],
+  },
+  {
+    id: "reel-velocity",
+    category: "Engagement Package",
+    title: "Reel Velocity",
+    description: "Designed for short-form reach acceleration with concentrated engagement volume.",
+    quantity: "300 Engagement Units",
+    price: 110,
+    eta: "8-18 hours",
+    highlight: false,
+    features: ["Reel-friendly profile", "Momentum layer", "Higher conversion potential"],
+  },
+  {
+    id: "signature-scale",
+    category: "Premium Mix Package",
+    title: "Signature Scale",
+    description: "A premium blended package for accounts that want visibility and engagement together.",
+    quantity: "400 Growth + 200 Engagement Units",
+    price: 320,
+    eta: "24-48 hours",
+    highlight: false,
+    features: ["Premium blend", "Human review", "White-glove fulfillment"],
+  },
+]
+
+export const trustStats = [
+  { label: "Fulfillment visibility", value: "100%" },
+  { label: "Manual payment review", value: "< 15m" },
+  { label: "Premium support windows", value: "7d" },
+]
+
+export const testimonials = [
+  {
+    quote: "The ordering flow feels more like premium software than a growth store. That trust layer matters.",
+    author: "Creator studio operator",
+  },
+  {
+    quote: "The track-order experience is unusually clean. Clients stop asking where their order is.",
+    author: "Agency growth lead",
+  },
+  {
+    quote: "The admin workflow is simple enough to run manually without looking amateur.",
+    author: "Indie social seller",
+  },
+]
+
+export const statusOptions = ["Pending", "Verified", "In Progress", "Completed", "Rejected"]
