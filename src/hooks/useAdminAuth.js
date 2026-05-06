@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-const STORAGE_KEY = "velora-admin-auth"
+const STORAGE_KEY = "libra-admin-auth"
 const adminPasskey = import.meta.env.VITE_ADMIN_PASSKEY || "change-me-admin"
 
 export function useAdminAuth() {

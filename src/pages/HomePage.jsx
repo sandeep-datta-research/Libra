@@ -51,7 +51,7 @@ export function HomePage() {
               transition={{ delay: 0.14 }}
               className="mt-6 max-w-2xl text-lg leading-8 text-zinc-400"
             >
-              Velora is a high-end growth storefront with modern package discovery, order creation, payment proof collection, order tracking, and a protected admin command layer.
+              Libra is a high-end growth storefront with modern package discovery, order creation, payment proof collection, order tracking, and a protected admin command layer.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 14 }}

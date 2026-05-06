@@ -1,6 +1,6 @@
-# Velora
+# Libra
 
-Premium SaaS-style Instagram growth storefront built with React, Vite, Tailwind CSS, Framer Motion, and Supabase.
+Premium SaaS-style Instagram growth storefront built with React, Vite, Tailwind CSS, Framer Motion, and Supabase, centered around the Libra brand.
 
 ## Included
 

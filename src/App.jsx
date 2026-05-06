@@ -34,7 +34,7 @@ function AppShell({ children }) {
               <Camera className="h-5 w-5 text-fuchsia-200" />
             </div>
             <div>
-              <p className="font-display text-lg tracking-[0.25em] text-white">VELORA</p>
+              <p className="font-display text-lg tracking-[0.25em] text-white">LIBRA</p>
               <p className="text-xs uppercase tracking-[0.34em] text-zinc-500">Instagram Growth Lab</p>
             </div>
           </NavLink>
@@ -69,9 +69,9 @@ function AppShell({ children }) {
       <footer className="relative z-10 border-t border-white/10 bg-black/20">
         <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-10 text-sm text-zinc-400 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
           <div className="space-y-3">
-            <p className="font-display text-xl text-white">Growth designed like a luxury product.</p>
+            <p className="font-display text-xl text-white">Libra, designed like a luxury product.</p>
             <p className="max-w-2xl leading-7">
-              Velora combines premium presentation, structured delivery, and manual payment verification for a frictionless Instagram growth ordering experience.
+              Libra combines premium presentation, structured delivery, and manual payment verification for a frictionless Instagram growth ordering experience.
             </p>
           </div>
           <div className="flex items-start justify-start gap-3 rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl lg:justify-end">

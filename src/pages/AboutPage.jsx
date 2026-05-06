@@ -30,7 +30,7 @@ export function AboutPage() {
       <div className="grid gap-10 xl:grid-cols-[0.95fr_1.05fr]">
         <div>
           <SectionHeading
-            eyebrow="About Velora"
+            eyebrow="About Libra"
             title="Trust is part of the product."
             copy="This experience was designed for operators who need a premium storefront while still working with manual payments and fulfillment review."
           />
@@ -38,7 +38,7 @@ export function AboutPage() {
         <div className="glass-panel rounded-[36px] p-7">
           <p className="section-kicker">Positioning</p>
           <p className="mt-4 text-lg leading-8 text-zinc-300">
-            Velora frames an Instagram growth offer with the same polish you would expect from a premium SaaS product: cinematic visual language, minimal friction, structured proof collection, and transparent order tracking.
+            Libra frames an Instagram growth offer with the same polish you would expect from a premium SaaS product: cinematic visual language, minimal friction, structured proof collection, and transparent order tracking.
           </p>
           <p className="mt-4 text-lg leading-8 text-zinc-300">
             The result is a storefront that feels deliberate rather than improvised, with enough backend structure to operate day to day.

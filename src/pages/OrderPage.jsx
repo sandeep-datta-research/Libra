@@ -10,7 +10,7 @@ import { services } from "../data/services"
 import { createOrder, submitPaymentProof } from "../lib/orders"
 import { buildOrderNotes, formatCurrency, validateInstagramUsername, validateScreenshot } from "../lib/utils"
 
-const profileKey = "velora-profile"
+const profileKey = "libra-profile"
 
 export function OrderPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -108,7 +108,7 @@ export function OrderPage() {
   }
 
   const upiId = import.meta.env.VITE_UPI_ID || "your-upi-id@bank"
-  const upiName = import.meta.env.VITE_UPI_NAME || "Velora Growth"
+  const upiName = import.meta.env.VITE_UPI_NAME || "Libra Growth"
 
   return (
     <section className="page-shell">

@@ -1,7 +1,7 @@
 import { isSupabaseConfigured, storageBucket, supabase } from "./supabase"
 
-const DEMO_ORDERS_KEY = "velora-demo-orders"
-const DEMO_CAPACITY_KEY = "velora-demo-capacity"
+const DEMO_ORDERS_KEY = "libra-demo-orders"
+const DEMO_CAPACITY_KEY = "libra-demo-capacity"
 
 function getStoredOrders() {
   if (typeof window === "undefined") return []
