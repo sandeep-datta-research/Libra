@@ -281,7 +281,7 @@ export function OrderPage() {
             <ul className="mt-4 space-y-3 text-sm leading-7 text-zinc-400">
               <li>Username validation prevents malformed orders.</li>
               <li>Proof uploads accept only image formats under 5MB.</li>
-              <li>Admin route is restricted to the approved Supabase email login.</li>
+              <li>Admin route is restricted to the approved backend admin login.</li>
             </ul>
           </div>
         </div>

@@ -1,108 +1,66 @@
 import { useEffect, useState } from "react"
-import { adminEmail, isSupabaseConfigured, siteUrl, supabase } from "../lib/supabase"
+import { apiRequest, getStoredAdminToken, setStoredAdminToken } from "../lib/api"
 
-function normalizeEmail(value) {
-  return value?.trim().toLowerCase() || ""
-}
+const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || "sandeepdatta866@gmail.com"
 
 export function useAdminAuth() {
-  const [session, setSession] = useState(null)
-  const [isLoading, setIsLoading] = useState(isSupabaseConfigured)
+  const [user, setUser] = useState(null)
+  const [isLoading, setIsLoading] = useState(() => Boolean(getStoredAdminToken()))
   const [authError, setAuthError] = useState("")
 
   useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) {
-      return undefined
-    }
+    if (!getStoredAdminToken()) return undefined
 
     let active = true
 
-    async function bootstrapSession() {
-      const { data, error } = await supabase.auth.getSession()
-      if (!active) return
-
-      if (error) {
-        setAuthError(error.message)
-        setIsLoading(false)
-        return
-      }
-
-      const nextSession = data.session
-      const currentEmail = normalizeEmail(nextSession?.user?.email)
-
-      if (nextSession && currentEmail !== normalizeEmail(adminEmail)) {
-        await supabase.auth.signOut()
+    async function loadMe() {
+      try {
+        const payload = await apiRequest("/api/admin/me", { admin: true })
         if (!active) return
-        setSession(null)
-        setAuthError(`Only ${adminEmail} can access the admin panel.`)
-      } else {
-        setSession(nextSession)
+        setUser(payload.user)
+      } catch (error) {
+        if (!active) return
+        setStoredAdminToken("")
+        setUser(null)
+        setAuthError(error.message || "Admin session expired.")
+      } finally {
+        if (active) {
+          setIsLoading(false)
+        }
       }
-
-      setIsLoading(false)
     }
 
-    void bootstrapSession()
-
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, nextSession) => {
-      const currentEmail = normalizeEmail(nextSession?.user?.email)
-
-      if (nextSession && currentEmail !== normalizeEmail(adminEmail)) {
-        await supabase.auth.signOut()
-        if (!active) return
-        setSession(null)
-        setAuthError(`Only ${adminEmail} can access the admin panel.`)
-        return
-      }
-
-      if (!active) return
-      setSession(nextSession)
-      setAuthError("")
-      setIsLoading(false)
-    })
+    void loadMe()
 
     return () => {
       active = false
-      listener.subscription.unsubscribe()
     }
   }, [])
 
-  async function sendMagicLink(email) {
-    const normalizedEmail = normalizeEmail(email)
-
-    if (normalizedEmail !== normalizeEmail(adminEmail)) {
-      throw new Error(`Use the approved admin email: ${adminEmail}`)
-    }
-
-    if (!supabase) {
-      throw new Error("Supabase is not configured yet.")
-    }
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email: normalizedEmail,
-      options: {
-        emailRedirectTo: `${siteUrl.replace(/\/$/, "")}/admin`,
-      },
+  async function login(email, password) {
+    const payload = await apiRequest("/api/admin/login", {
+      method: "POST",
+      body: { email, password },
     })
 
-    if (error) throw error
-    return true
+    setStoredAdminToken(payload.token)
+    setUser(payload.user)
+    setAuthError("")
+    return payload.user
   }
 
-  async function logout() {
-    if (!supabase) return
-    await supabase.auth.signOut()
-    setSession(null)
+  function logout() {
+    setStoredAdminToken("")
+    setUser(null)
   }
 
   return {
     adminEmail,
     authError,
-    isAuthenticated: normalizeEmail(session?.user?.email) === normalizeEmail(adminEmail),
+    isAuthenticated: Boolean(user),
     isLoading,
-    isSupabaseConfigured,
+    login,
     logout,
-    sendMagicLink,
-    user: session?.user ?? null,
+    user,
   }
 }

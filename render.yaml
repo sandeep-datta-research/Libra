@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: libra-backend
+    runtime: node
+    rootDir: .
+    buildCommand: pnpm install
+    startCommand: pnpm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20
