@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion"
+import { LogOut, Menu, ShieldCheck, Sparkles, UserCircle2, X } from "lucide-react"
 import { BrowserRouter, NavLink, Route, Routes, useLocation } from "react-router-dom"
-import { ShieldCheck, Sparkles, UserCircle2 } from "lucide-react"
+import { useState } from "react"
 import { HomePage } from "./pages/HomePage"
 import { ServicesPage } from "./pages/ServicesPage"
 import { OrderPage } from "./pages/OrderPage"
@@ -24,8 +25,16 @@ const navItems = [
 ]
 
 function AppShell({ children }) {
-  const { user } = useAuthSession()
+  const { logout, user } = useAuthSession()
   const { isAuthenticated: isAdmin } = useAdminAuth()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  const portalItem = user
+    ? {
+        to: isAdmin ? "/admin" : "/portal",
+        label: isAdmin ? "Admin Dashboard" : "Your Portal",
+      }
+    : null
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_25%),radial-gradient(circle_at_20%_20%,rgba(124,58,237,0.2),transparent_24%),radial-gradient(circle_at_80%_10%,rgba(45,212,191,0.1),transparent_22%),#050816] text-zinc-100">
@@ -78,13 +87,129 @@ function AppShell({ children }) {
             ) : null}
             <NavLink
               to="/order?plan=growth-boost"
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_16px_40px_rgba(255,255,255,0.12)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(255,255,255,0.18)]"
+              className="hidden items-center gap-2 rounded-full border border-white/10 bg-white px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_16px_40px_rgba(255,255,255,0.12)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(255,255,255,0.18)] sm:inline-flex"
             >
               <Sparkles className="h-4 w-4" />
               Start Growth
             </NavLink>
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen((current) => !current)}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/6 text-white transition hover:bg-white/10 md:hidden"
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMenuOpen}
+            >
+              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
+        <AnimatePresence>
+          {isMenuOpen ? (
+            <motion.div
+              initial={{ opacity: 0, y: -12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              className="border-t border-white/10 bg-[#070b18]/96 px-4 py-4 backdrop-blur-2xl md:hidden"
+            >
+              {user ? (
+                <div className="mb-4 flex items-center gap-3 rounded-[24px] border border-white/10 bg-white/5 p-4">
+                  {user.picture ? (
+                    <img src={user.picture} alt={user.name} className="h-11 w-11 rounded-2xl object-cover" />
+                  ) : (
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/8">
+                      <UserCircle2 className="h-5 w-5" />
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-white">{user.name || user.email}</p>
+                    <p className="truncate text-xs uppercase tracking-[0.22em] text-zinc-500">
+                      {isAdmin ? "Admin Access" : "Customer Portal"}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="grid gap-2">
+                {navItems
+                  .filter((item) => item.to !== "/admin" && item.to !== "/portal")
+                  .map((item) => (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={({ isActive }) =>
+                        [
+                          "rounded-[20px] border px-4 py-3 text-sm font-medium transition",
+                          isActive
+                            ? "border-white bg-white text-slate-950"
+                            : "border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10",
+                        ].join(" ")
+                      }
+                    >
+                      {item.label}
+                    </NavLink>
+                  ))}
+
+                <NavLink
+                  to="/order?plan=growth-boost"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="rounded-[20px] border border-white/10 bg-white px-4 py-3 text-sm font-semibold text-slate-950"
+                >
+                  Start Growth
+                </NavLink>
+
+                {portalItem ? (
+                  <NavLink
+                    to={portalItem.to}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={({ isActive }) =>
+                      [
+                        "rounded-[20px] border px-4 py-3 text-sm font-medium transition",
+                        isActive
+                          ? "border-fuchsia-200/20 bg-fuchsia-200/12 text-white"
+                          : "border-fuchsia-200/15 bg-fuchsia-200/8 text-fuchsia-100 hover:bg-fuchsia-200/12",
+                      ].join(" ")
+                    }
+                  >
+                    {portalItem.label}
+                  </NavLink>
+                ) : null}
+
+                {isAdmin ? (
+                  <NavLink
+                    to="/admin"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={({ isActive }) =>
+                      [
+                        "rounded-[20px] border px-4 py-3 text-sm font-medium transition",
+                        isActive
+                          ? "border-emerald-200/20 bg-emerald-300/12 text-white"
+                          : "border-emerald-200/15 bg-emerald-300/8 text-emerald-100 hover:bg-emerald-300/12",
+                      ].join(" ")
+                    }
+                  >
+                    Admin Access
+                  </NavLink>
+                ) : null}
+
+                {user ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      logout()
+                      setIsMenuOpen(false)
+                    }}
+                    className="inline-flex items-center justify-center gap-2 rounded-[20px] border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-zinc-200 transition hover:bg-white/10"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </button>
+                ) : null}
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
       </header>
       <main className="relative z-10">{children}</main>
       <footer className="relative z-10 border-t border-white/10 bg-black/20">
