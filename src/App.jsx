@@ -21,7 +21,6 @@ const navItems = [
   { to: "/track", label: "Track" },
   { to: "/portal", label: "Portal" },
   { to: "/about", label: "Trust" },
-  { to: "/admin", label: "Admin" },
 ]
 
 function AppShell({ children }) {
@@ -70,8 +69,29 @@ function AppShell({ children }) {
                 {item.label}
               </NavLink>
             ))}
+            {isAdmin ? (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) =>
+                  [
+                    "rounded-full px-4 py-2 text-sm font-medium transition",
+                    isActive
+                      ? "bg-emerald-300 text-slate-950 shadow-[0_16px_30px_rgba(16,185,129,0.18)]"
+                      : "text-emerald-100 hover:bg-emerald-300/15 hover:text-white",
+                  ].join(" ")
+                }
+              >
+                Admin
+              </NavLink>
+            ) : null}
           </nav>
           <div className="flex items-center gap-3">
+            {isAdmin ? (
+              <div className="hidden items-center gap-2 rounded-full border border-emerald-200/15 bg-emerald-300/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-100 lg:inline-flex">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Admin Signed In
+              </div>
+            ) : null}
             {user ? (
               <NavLink
                 to={isAdmin ? "/admin" : "/portal"}
@@ -127,12 +147,17 @@ function AppShell({ children }) {
                       {isAdmin ? "Admin Access" : "Customer Portal"}
                     </p>
                   </div>
+                  {isAdmin ? (
+                    <span className="ml-auto rounded-full border border-emerald-200/15 bg-emerald-300/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-100">
+                      Admin
+                    </span>
+                  ) : null}
                 </div>
               ) : null}
 
               <div className="grid gap-2">
                 {navItems
-                  .filter((item) => item.to !== "/admin" && item.to !== "/portal")
+                  .filter((item) => item.to !== "/portal")
                   .map((item) => (
                     <NavLink
                       key={item.to}
