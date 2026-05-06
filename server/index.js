@@ -362,7 +362,7 @@ app.put("/api/admin/settings/capacity", requireAdmin, async (req, res) => {
   res.json({ capacity: await setCapacityValue(capacity) })
 })
 
-app.use((error, _req, res) => {
+app.use((error, _req, res, _next) => {
   res.status(400).json({ message: error.message || "Request failed." })
 })
 
