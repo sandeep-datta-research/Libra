@@ -25,6 +25,8 @@ export function ServicesPage() {
     navigate(`/order?plan=${plan.id}`)
   }
 
+  const totalSlots = products.reduce((sum, product) => sum + Math.max(0, Number(product.slots || 0)), 0)
+
   return (
     <section className="page-shell">
       <SectionHeading
@@ -36,7 +38,7 @@ export function ServicesPage() {
         <div>
           <p className="text-sm text-zinc-500">Current service capacity</p>
           <p className="mt-1 text-lg font-semibold text-white">
-            {capacity === null ? "Loading..." : `${capacity} active order slots remaining`}
+            {capacity === null ? "Loading..." : `${capacity} global ops slots • ${totalSlots} package slots remaining`}
           </p>
         </div>
         <span className="rounded-full border border-emerald-200/15 bg-emerald-300/10 px-3 py-1 text-xs uppercase tracking-[0.24em] text-emerald-200">

@@ -35,6 +35,7 @@ function cloneSeedProducts() {
   return seededServices.map((service) => ({
     ...service,
     features: [...service.features],
+    slots: Math.max(0, Number(service.slots || 0)),
     isAvailable: service.isAvailable ?? true,
     stockLabel: service.stockLabel || "Available",
   }))
@@ -73,10 +74,11 @@ function normalizeProductInput(input, fallbackId = "") {
     description: `${input.description || ""}`.trim(),
     quantity: `${input.quantity || ""}`.trim(),
     price: Number(input.price || 0),
+    slots: Math.max(0, Number(input.slots || 0)),
     eta: `${input.eta || ""}`.trim(),
     highlight: Boolean(input.highlight),
-    isAvailable: input.isAvailable !== false,
-    stockLabel: `${input.stockLabel || (input.isAvailable === false ? "Out of stock" : "Available")}`.trim(),
+    isAvailable: input.isAvailable !== false && Math.max(0, Number(input.slots || 0)) > 0,
+    stockLabel: `${input.stockLabel || (input.isAvailable === false || Math.max(0, Number(input.slots || 0)) <= 0 ? "Out of stock" : "Available")}`.trim(),
     features: normalizeFeatures(input.features),
   }
 }
@@ -88,6 +90,10 @@ function validateProduct(product) {
 
   if (!Number.isFinite(product.price) || product.price <= 0) {
     return "Price must be a valid number."
+  }
+
+  if (!Number.isFinite(product.slots) || product.slots < 0) {
+    return "Slots must be zero or more."
   }
 
   if (product.features.length === 0) {
@@ -181,6 +187,7 @@ const productSchema = new mongoose.Schema(
     description: { type: String, required: true },
     quantity: { type: String, required: true },
     price: { type: Number, required: true },
+    slots: { type: Number, default: 0 },
     eta: { type: String, required: true },
     highlight: { type: Boolean, default: false },
     isAvailable: { type: Boolean, default: true },
@@ -486,7 +493,7 @@ app.post("/api/orders", async (req, res) => {
     return
   }
 
-  if (product.isAvailable === false) {
+  if (product.isAvailable === false || Number(product.slots || 0) <= 0) {
     res.status(400).json({ message: "This card is currently out of stock." })
     return
   }

@@ -4,7 +4,8 @@ import { formatCurrency } from "../lib/utils"
 import { Button } from "./Button"
 
 export function PlanCard({ plan, onSelect }) {
-  const isOutOfStock = plan.isAvailable === false
+  const slots = Number(plan.slots || 0)
+  const isOutOfStock = plan.isAvailable === false || slots <= 0
 
   return (
     <motion.article
@@ -45,6 +46,12 @@ export function PlanCard({ plan, onSelect }) {
           <p className="text-sm text-zinc-500">Price</p>
           <p className="mt-1 text-3xl font-semibold text-white">{formatCurrency(plan.price)}</p>
         </div>
+      </div>
+      <div className="mt-4 rounded-[20px] border border-white/10 bg-[#091021] px-4 py-3">
+        <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Package slots</p>
+        <p className="mt-2 text-sm font-semibold text-white">
+          {isOutOfStock ? "0 slots left" : `${slots} slots left`}
+        </p>
       </div>
       <div className="mt-5 flex flex-wrap gap-2">
         {plan.features.map((feature) => (

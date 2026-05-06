@@ -18,6 +18,7 @@ function createEmptyProduct() {
     description: "",
     quantity: "",
     price: "",
+    slots: "",
     eta: "",
     featuresText: "",
     highlight: false,
@@ -34,6 +35,7 @@ function toFormState(product) {
     description: product.description || "",
     quantity: product.quantity || "",
     price: `${product.price || ""}`,
+    slots: `${product.slots ?? ""}`,
     eta: product.eta || "",
     featuresText: Array.isArray(product.features) ? product.features.join(", ") : "",
     highlight: Boolean(product.highlight),
@@ -46,6 +48,7 @@ function toPayload(product) {
   return {
     ...product,
     price: Number(product.price || 0),
+    slots: Math.max(0, Number(product.slots || 0)),
     features: product.featuresText,
   }
 }
@@ -302,6 +305,17 @@ export function AdminPage() {
                   />
                 </label>
                 <label className="space-y-2">
+                  <span className="text-sm text-zinc-400">Slots</span>
+                  <input
+                    type="number"
+                    min="0"
+                    className="field"
+                    value={productForm.slots}
+                    onChange={(event) => setProductForm((current) => ({ ...current, slots: event.target.value }))}
+                    placeholder="12"
+                  />
+                </label>
+                <label className="space-y-2">
                   <span className="text-sm text-zinc-400">ETA</span>
                   <input
                     className="field"
@@ -403,6 +417,9 @@ export function AdminPage() {
                         <div>
                           <p className="text-sm text-zinc-500">Quantity</p>
                           <p className="mt-1 text-base font-medium text-white">{product.quantity}</p>
+                          <p className="mt-2 text-xs uppercase tracking-[0.18em] text-zinc-500">
+                            {Math.max(0, Number(product.slots || 0))} slots left
+                          </p>
                         </div>
                         <div className="text-right">
                           <p className="text-sm text-zinc-500">Price</p>

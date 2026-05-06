@@ -172,6 +172,13 @@ export function OrderPage() {
       />
       <div className="mt-10 grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-6">
+          <div className="rounded-[30px] border border-amber-200/15 bg-amber-300/10 p-5">
+            <p className="section-kicker text-amber-100">Important Notice</p>
+            <p className="mt-3 text-base font-semibold text-white">Keep your Instagram account public while the order is being delivered.</p>
+            <p className="mt-2 text-sm leading-7 text-amber-50/85">
+              Private accounts can block fulfillment and delay verification. Switch to public before placing the order and keep it public until completion.
+            </p>
+          </div>
           {!isAuthenticated ? (
             <div className="rounded-[30px] border border-white/10 bg-[#081121] p-5">
               <div className="flex flex-wrap items-center justify-between gap-4">
@@ -245,6 +252,10 @@ export function OrderPage() {
               <div className="rounded-[22px] border border-white/10 bg-[#0a0f1f] p-4">
                 <p className="text-xs uppercase tracking-[0.22em] text-zinc-500">Proof</p>
                 <p className="mt-2 text-sm font-semibold text-white">Txn ID + Screenshot</p>
+              </div>
+              <div className="rounded-[22px] border border-white/10 bg-[#0a0f1f] p-4 sm:col-span-3">
+                <p className="text-xs uppercase tracking-[0.22em] text-zinc-500">Slots left on this package</p>
+                <p className="mt-2 text-sm font-semibold text-white">{Math.max(0, Number(selectedPlan.slots || 0))} active slots</p>
               </div>
             </div>
 

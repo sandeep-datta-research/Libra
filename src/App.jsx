@@ -235,6 +235,11 @@ function AppShell({ children }) {
             </motion.div>
           ) : null}
         </AnimatePresence>
+        <div className="border-t border-white/8 bg-amber-300/10 px-4 py-3">
+          <p className="mx-auto flex w-full max-w-7xl items-center justify-center text-center text-xs font-medium uppercase tracking-[0.22em] text-amber-100 sm:text-sm">
+            Important: your Instagram account must be public during delivery.
+          </p>
+        </div>
       </header>
       <main className="relative z-10">{children}</main>
       <footer className="relative z-10 border-t border-white/10 bg-black/20">
