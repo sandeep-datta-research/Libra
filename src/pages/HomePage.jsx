@@ -1,10 +1,13 @@
 import { motion } from "framer-motion"
+import { useEffect, useMemo, useState } from "react"
 import { ArrowRight, BadgeCheck, Clock3, LineChart, ShieldCheck, Sparkles, WalletCards } from "lucide-react"
 import { Link } from "react-router-dom"
 import { testimonials, trustStats } from "../data/services"
 import { Button } from "../components/Button"
 import { LogoMark } from "../components/LogoMark"
 import { SectionHeading } from "../components/SectionHeading"
+import { listProducts } from "../lib/products"
+import { formatCurrency } from "../lib/utils"
 
 const benefits = [
   {
@@ -25,6 +28,16 @@ const benefits = [
 ]
 
 export function HomePage() {
+  const [products, setProducts] = useState([])
+
+  useEffect(() => {
+    listProducts().then(setProducts).catch(() => setProducts([]))
+  }, [])
+
+  const featuredPlan = useMemo(() => {
+    return products.find((product) => product.highlight && product.isAvailable !== false) || products.find((product) => product.isAvailable !== false) || null
+  }, [products])
+
   return (
     <>
       <section className="page-shell pt-14 sm:pt-20">
@@ -60,9 +73,9 @@ export function HomePage() {
               transition={{ delay: 0.2 }}
               className="mt-8 flex flex-wrap gap-4"
             >
-              <Link to="/order?plan=growth-boost">
+              <Link to={`/order?plan=${featuredPlan?.id || "growth-boost"}`}>
                 <Button className="gap-2 bg-[linear-gradient(135deg,#ffffff,#f5d0fe_52%,#bae6fd)]">
-                  Start with Growth Boost
+                  Start with {featuredPlan?.title || "Growth Boost"}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
@@ -129,11 +142,11 @@ export function HomePage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-zinc-500">Featured package</p>
-                    <p className="mt-2 text-xl font-semibold text-white">Growth Boost</p>
+                    <p className="mt-2 text-xl font-semibold text-white">{featuredPlan?.title || "Growth Boost"}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-zinc-500">Total</p>
-                    <p className="mt-2 text-2xl font-semibold text-white">₹120</p>
+                    <p className="mt-2 text-2xl font-semibold text-white">{formatCurrency(featuredPlan?.price || 120)}</p>
                   </div>
                 </div>
               </div>

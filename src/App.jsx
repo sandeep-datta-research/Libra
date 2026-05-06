@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { BrowserRouter, NavLink, Route, Routes, useLocation } from "react-router-dom"
-import { ShieldCheck, Sparkles } from "lucide-react"
+import { ShieldCheck, Sparkles, UserCircle2 } from "lucide-react"
 import { HomePage } from "./pages/HomePage"
 import { ServicesPage } from "./pages/ServicesPage"
 import { OrderPage } from "./pages/OrderPage"
@@ -9,17 +9,24 @@ import { AboutPage } from "./pages/AboutPage"
 import { AdminPage } from "./pages/AdminPage"
 import { ProtectedRoute } from "./components/ProtectedRoute"
 import { LogoMark } from "./components/LogoMark"
+import { PortalPage } from "./pages/PortalPage"
+import { useAdminAuth } from "./hooks/useAdminAuth"
+import { useAuthSession } from "./hooks/useAuthSession"
 
 const navItems = [
   { to: "/", label: "Home" },
   { to: "/services", label: "Services" },
   { to: "/order", label: "Order" },
   { to: "/track", label: "Track" },
+  { to: "/portal", label: "Portal" },
   { to: "/about", label: "Trust" },
   { to: "/admin", label: "Admin" },
 ]
 
 function AppShell({ children }) {
+  const { user } = useAuthSession()
+  const { isAuthenticated: isAdmin } = useAdminAuth()
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_25%),radial-gradient(circle_at_20%_20%,rgba(124,58,237,0.2),transparent_24%),radial-gradient(circle_at_80%_10%,rgba(45,212,191,0.1),transparent_22%),#050816] text-zinc-100">
       <div className="pointer-events-none absolute inset-0 opacity-70">
@@ -55,13 +62,28 @@ function AppShell({ children }) {
               </NavLink>
             ))}
           </nav>
-          <NavLink
-            to="/order?plan=growth-boost"
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_16px_40px_rgba(255,255,255,0.12)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(255,255,255,0.18)]"
-          >
-            <Sparkles className="h-4 w-4" />
-            Start Growth
-          </NavLink>
+          <div className="flex items-center gap-3">
+            {user ? (
+              <NavLink
+                to={isAdmin ? "/admin" : "/portal"}
+                className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-2 text-sm text-white md:inline-flex"
+              >
+                {user.picture ? (
+                  <img src={user.picture} alt={user.name} className="h-6 w-6 rounded-full object-cover" />
+                ) : (
+                  <UserCircle2 className="h-4 w-4" />
+                )}
+                {isAdmin ? "Admin" : "Portal"}
+              </NavLink>
+            ) : null}
+            <NavLink
+              to="/order?plan=growth-boost"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_16px_40px_rgba(255,255,255,0.12)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(255,255,255,0.18)]"
+            >
+              <Sparkles className="h-4 w-4" />
+              Start Growth
+            </NavLink>
+          </div>
         </div>
       </header>
       <main className="relative z-10">{children}</main>
@@ -105,6 +127,7 @@ function AnimatedRoutes() {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/order" element={<OrderPage />} />
           <Route path="/track" element={<TrackOrderPage />} />
+          <Route path="/portal" element={<PortalPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route
             path="/admin"

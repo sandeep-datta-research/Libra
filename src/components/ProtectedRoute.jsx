@@ -1,15 +1,10 @@
-import { LockKeyhole, ShieldCheck } from "lucide-react"
-import { useState } from "react"
+import { ShieldCheck } from "lucide-react"
 import { useAdminAuth } from "../hooks/useAdminAuth"
-import { Button } from "./Button"
+import { GoogleLoginButton } from "./GoogleLoginButton"
 import { SkeletonCard } from "./SkeletonCard"
 
 export function ProtectedRoute({ children }) {
-  const { adminEmail, authError, isAuthenticated, isLoading, login } = useAdminAuth()
-  const [email, setEmail] = useState(adminEmail)
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { adminEmail, authError, isAuthenticated, isLoading, loginWithGoogle, user } = useAdminAuth()
 
   if (isLoading) {
     return (
@@ -34,58 +29,28 @@ export function ProtectedRoute({ children }) {
         <p className="section-kicker mt-6 text-center">Protected Route</p>
         <h1 className="mt-4 text-center font-display text-5xl text-white">Admin access</h1>
         <p className="mx-auto mt-4 max-w-md text-center leading-7 text-zinc-400">
-          Admin access is restricted to the approved Libra operator email and backend credentials.
+          Only the approved Libra operator account can open this dashboard. Continue with Google using the exact admin email.
         </p>
-        <form
-          className="mt-8 space-y-4"
-          onSubmit={async (event) => {
-            event.preventDefault()
-            setError("")
-            setIsSubmitting(true)
-            try {
-              await login(email, password)
-            } catch (submissionError) {
-              setError(submissionError.message || "Login failed.")
-            } finally {
-              setIsSubmitting(false)
-            }
-          }}
-        >
-          <label className="space-y-2">
-            <span className="text-sm text-zinc-400">Admin email</span>
-            <input
-              type="email"
-              className="field"
-              value={email}
-              onChange={(event) => {
-                setEmail(event.target.value)
-                setError("")
-              }}
-              placeholder={adminEmail}
-            />
-          </label>
-          <label className="space-y-2">
-            <span className="text-sm text-zinc-400">Admin password</span>
-            <div className="relative">
-              <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-              <input
-                type="password"
-                className="field pl-11"
-                value={password}
-                onChange={(event) => {
-                  setPassword(event.target.value)
-                  setError("")
-                }}
-                placeholder="Enter admin password"
-              />
-            </div>
-          </label>
-          {authError ? <p className="text-sm text-rose-300">{authError}</p> : null}
-          {error ? <p className="text-sm text-rose-300">{error}</p> : null}
-          <Button type="submit" disabled={isSubmitting} className="w-full justify-center">
-            {isSubmitting ? "Signing in..." : "Unlock Admin Panel"}
-          </Button>
-        </form>
+        <div className="mt-8 rounded-[28px] border border-white/10 bg-white/5 p-5">
+          <p className="text-sm text-zinc-400">Approved operator</p>
+          <p className="mt-2 text-lg font-semibold text-white">{adminEmail}</p>
+        </div>
+        <div className="mt-6 rounded-[28px] border border-white/10 bg-[#0a1020] p-6">
+          <GoogleLoginButton
+            text="continue_with"
+            width={360}
+            onCredential={async (credential) => {
+              const nextUser = await loginWithGoogle(credential)
+              if (nextUser.email !== adminEmail || nextUser.role !== "admin") {
+                throw new Error(`Sign in with ${adminEmail} to access the admin dashboard.`)
+              }
+            }}
+          />
+          {user && !isAuthenticated ? (
+            <p className="mt-4 text-sm text-rose-300">Signed in as {user.email}, but that account is not the approved admin.</p>
+          ) : null}
+          {authError ? <p className="mt-4 text-sm text-rose-300">{authError}</p> : null}
+        </div>
       </div>
     </section>
   )

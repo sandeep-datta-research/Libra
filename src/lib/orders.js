@@ -33,6 +33,11 @@ export async function trackOrder(orderId) {
   return payload.order
 }
 
+export async function listPortalOrders() {
+  const payload = await apiRequest("/api/portal/orders", { auth: true })
+  return payload.orders || []
+}
+
 export async function listOrders(status = "All") {
   const suffix = status !== "All" ? `?status=${encodeURIComponent(status)}` : ""
   const payload = await apiRequest(`/api/admin/orders${suffix}`, { admin: true })

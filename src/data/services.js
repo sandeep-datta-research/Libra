@@ -8,6 +8,8 @@ export const services = [
     price: 60,
     eta: "12-24 hours",
     highlight: false,
+    isAvailable: true,
+    stockLabel: "Available",
     features: ["Beginner-safe pacing", "Visibility boost", "Manual quality check"],
   },
   {
@@ -19,6 +21,8 @@ export const services = [
     price: 120,
     eta: "12-24 hours",
     highlight: true,
+    isAvailable: true,
+    stockLabel: "Best seller",
     features: ["Most popular", "Balanced delivery", "Priority review lane"],
   },
   {
@@ -30,6 +34,8 @@ export const services = [
     price: 40,
     eta: "6-18 hours",
     highlight: false,
+    isAvailable: true,
+    stockLabel: "Available",
     features: ["Story-safe boost", "Fast verification", "Premium support"],
   },
   {
@@ -41,6 +47,8 @@ export const services = [
     price: 260,
     eta: "24-36 hours",
     highlight: false,
+    isAvailable: true,
+    stockLabel: "Available",
     features: ["Campaign-ready", "Priority queue", "Operations monitoring"],
   },
   {
@@ -52,6 +60,8 @@ export const services = [
     price: 110,
     eta: "8-18 hours",
     highlight: false,
+    isAvailable: true,
+    stockLabel: "Available",
     features: ["Reel-friendly profile", "Momentum layer", "Higher conversion potential"],
   },
   {
@@ -63,6 +73,8 @@ export const services = [
     price: 320,
     eta: "24-48 hours",
     highlight: false,
+    isAvailable: true,
+    stockLabel: "Available",
     features: ["Premium blend", "Human review", "White-glove fulfillment"],
   },
 ]

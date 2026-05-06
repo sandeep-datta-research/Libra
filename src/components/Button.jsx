@@ -9,11 +9,12 @@ const variants = {
   ghost: "text-zinc-300 hover:bg-white/8 hover:text-white",
 }
 
-export function Button({ className, children, variant = "primary", ...props }) {
+export function Button({ className, children, type = "button", variant = "primary", ...props }) {
   return (
     <motion.button
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.985 }}
+      type={type}
       className={cn(
         "inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-fuchsia-300/20 disabled:cursor-not-allowed disabled:opacity-60",
         variants[variant],

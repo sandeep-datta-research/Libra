@@ -4,29 +4,29 @@ function buildUrl(path) {
   return apiBaseUrl ? `${apiBaseUrl}${path}` : path
 }
 
-export function getStoredAdminToken() {
+export function getStoredAuthToken() {
   if (typeof window === "undefined") return ""
-  return window.localStorage.getItem("libra-admin-token") || ""
+  return window.localStorage.getItem("libra-auth-token") || ""
 }
 
-export function setStoredAdminToken(token) {
+export function setStoredAuthToken(token) {
   if (typeof window === "undefined") return
   if (token) {
-    window.localStorage.setItem("libra-admin-token", token)
+    window.localStorage.setItem("libra-auth-token", token)
   } else {
-    window.localStorage.removeItem("libra-admin-token")
+    window.localStorage.removeItem("libra-auth-token")
   }
 }
 
-export async function apiRequest(path, { method = "GET", body, headers = {}, isForm = false, admin = false } = {}) {
+export async function apiRequest(path, { method = "GET", body, headers = {}, isForm = false, auth = false, admin = false } = {}) {
   const requestHeaders = new Headers(headers)
 
   if (!isForm) {
     requestHeaders.set("Content-Type", "application/json")
   }
 
-  if (admin) {
-    const token = getStoredAdminToken()
+  if (auth || admin) {
+    const token = getStoredAuthToken()
     if (token) {
       requestHeaders.set("Authorization", `Bearer ${token}`)
     }

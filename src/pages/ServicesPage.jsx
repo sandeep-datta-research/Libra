@@ -3,18 +3,25 @@ import { useNavigate } from "react-router-dom"
 import { PlanCard } from "../components/PlanCard"
 import { SectionHeading } from "../components/SectionHeading"
 import { SkeletonCard } from "../components/SkeletonCard"
-import { services } from "../data/services"
 import { getCapacity } from "../lib/orders"
+import { listProducts } from "../lib/products"
 
 export function ServicesPage() {
   const navigate = useNavigate()
   const [capacity, setCapacity] = useState(null)
+  const [products, setProducts] = useState([])
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true)
 
   useEffect(() => {
     getCapacity().then(setCapacity).catch(() => setCapacity(24))
+    listProducts()
+      .then((rows) => setProducts(rows))
+      .catch(() => setProducts([]))
+      .finally(() => setIsLoadingProducts(false))
   }, [])
 
   function handleSelect(plan) {
+    if (plan.isAvailable === false) return
     navigate(`/order?plan=${plan.id}`)
   }
 
@@ -37,9 +44,9 @@ export function ServicesPage() {
         </span>
       </div>
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
-        {capacity === null
+        {capacity === null || isLoadingProducts
           ? Array.from({ length: 4 }).map((_, index) => <SkeletonCard key={index} className="h-[320px]" />)
-          : services.map((plan) => <PlanCard key={plan.id} plan={plan} onSelect={handleSelect} />)}
+          : products.map((plan) => <PlanCard key={plan.id} plan={plan} onSelect={handleSelect} />)}
       </div>
     </section>
   )

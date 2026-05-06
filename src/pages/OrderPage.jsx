@@ -1,21 +1,29 @@
-import { useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { motion } from "framer-motion"
-import { CheckCheck, Copy, ExternalLink, ImageUp, QrCode, ReceiptIndianRupee, ShieldCheck, WalletCards } from "lucide-react"
+import { CheckCheck, Copy, ExternalLink, ImageUp, LogIn, QrCode, ReceiptIndianRupee, ShieldCheck, WalletCards } from "lucide-react"
 import { useSearchParams } from "react-router-dom"
 import { Button } from "../components/Button"
+import { GoogleLoginButton } from "../components/GoogleLoginButton"
 import { OrderSuccessAnimation } from "../components/OrderSuccessAnimation"
 import { PlanCard } from "../components/PlanCard"
 import { SectionHeading } from "../components/SectionHeading"
-import { services } from "../data/services"
+import { SkeletonCard } from "../components/SkeletonCard"
+import { useAuthSession } from "../hooks/useAuthSession"
+import { listProducts } from "../lib/products"
 import { createOrder, submitPaymentProof } from "../lib/orders"
 import { buildOrderNotes, formatCurrency, validateInstagramUsername, validateScreenshot } from "../lib/utils"
 
 const profileKey = "libra-profile"
 
 export function OrderPage() {
+  const { isAuthenticated, loginWithGoogle, user } = useAuthSession()
   const [searchParams, setSearchParams] = useSearchParams()
   const planId = searchParams.get("plan")
-  const selectedPlan = useMemo(() => services.find((plan) => plan.id === planId) || services[1], [planId])
+  const [products, setProducts] = useState([])
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true)
+  const selectedPlan = useMemo(() => {
+    return products.find((plan) => plan.id === planId) || products.find((plan) => plan.highlight) || products[0] || null
+  }, [planId, products])
   const [profile, setProfile] = useState(() => {
     if (typeof window === "undefined") {
       return { name: "", email: "" }
@@ -43,13 +51,26 @@ export function OrderPage() {
   const [copiedField, setCopiedField] = useState("")
   const summaryRef = useRef(null)
 
+  useEffect(() => {
+    listProducts()
+      .then((rows) => setProducts(rows))
+      .catch(() => setProducts([]))
+      .finally(() => setIsLoadingProducts(false))
+  }, [])
+
   function handlePlanSelect(plan) {
+    if (plan.isAvailable === false) return
     setSearchParams({ plan: plan.id })
     summaryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
   async function handleCreateOrder(event) {
     event.preventDefault()
+
+    if (!selectedPlan) {
+      setError("No package is currently available.")
+      return
+    }
 
     if (!validateInstagramUsername(username.trim())) {
       setError("Enter a valid Instagram username without @.")
@@ -61,8 +82,8 @@ export function OrderPage() {
 
     try {
       const normalizedProfile = {
-        name: profile.name.trim(),
-        email: profile.email.trim(),
+        name: (user?.name || profile.name).trim(),
+        email: (user?.email || profile.email).trim(),
       }
       if (typeof window !== "undefined") {
         window.localStorage.setItem(profileKey, JSON.stringify(normalizedProfile))
@@ -70,8 +91,11 @@ export function OrderPage() {
 
       const created = await createOrder({
         username: username.trim(),
-        service: `${selectedPlan.title} • ${formatCurrency(selectedPlan.price)}`,
+        serviceId: selectedPlan.id,
         notes: buildOrderNotes(notes, normalizedProfile),
+        userEmail: user?.email || normalizedProfile.email,
+        userName: user?.name || normalizedProfile.name,
+        userPicture: user?.picture || "",
       })
       setCreatedOrder(created)
     } catch (submissionError) {
@@ -113,6 +137,7 @@ export function OrderPage() {
   const upiId = import.meta.env.VITE_UPI_ID || "satousandeep@fam"
   const upiName = import.meta.env.VITE_UPI_NAME || "Libra"
   const upiLink = useMemo(() => {
+    if (!selectedPlan) return ""
     const params = new URLSearchParams({
       pa: upiId,
       pn: upiName,
@@ -122,7 +147,7 @@ export function OrderPage() {
     })
 
     return `upi://pay?${params.toString()}`
-  }, [selectedPlan.price, selectedPlan.title, upiId, upiName])
+  }, [selectedPlan, upiId, upiName])
   const qrUrl = useMemo(
     () => `https://quickchart.io/qr?size=260&text=${encodeURIComponent(upiLink)}`,
     [upiLink],
@@ -147,14 +172,45 @@ export function OrderPage() {
       />
       <div className="mt-10 grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-6">
+          {!isAuthenticated ? (
+            <div className="rounded-[30px] border border-white/10 bg-[#081121] p-5">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p className="section-kicker">Optional Login</p>
+                  <p className="mt-2 text-lg font-semibold text-white">Sign in once to auto-fill your order identity.</p>
+                  <p className="mt-2 max-w-2xl text-sm leading-7 text-zinc-400">
+                    Google login is optional for customers, but it keeps your future orders visible in the portal and pre-fills name and email automatically.
+                  </p>
+                </div>
+                <div className="min-w-[280px]">
+                  <GoogleLoginButton text="continue_with" width={320} onCredential={loginWithGoogle} />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-[30px] border border-emerald-200/15 bg-emerald-300/10 p-5">
+              <div className="flex items-center gap-3">
+                <LogIn className="h-5 w-5 text-emerald-200" />
+                <div>
+                  <p className="text-sm font-medium text-white">Signed in as {user?.email}</p>
+                  <p className="mt-1 text-sm text-emerald-100/85">Your identity will be attached to this order and visible in the user portal.</p>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="grid gap-6 lg:grid-cols-2">
-            {services.map((plan) => (
-              <PlanCard key={plan.id} plan={plan} onSelect={handlePlanSelect} />
-            ))}
+            {isLoadingProducts
+              ? Array.from({ length: 4 }).map((_, index) => <SkeletonCard key={index} className="h-[320px]" />)
+              : products.map((plan) => <PlanCard key={plan.id} plan={plan} onSelect={handlePlanSelect} />)}
           </div>
         </div>
         <div ref={summaryRef} className="space-y-6 xl:sticky xl:top-28 xl:self-start">
-          <div className="glass-panel rounded-[32px] p-6">
+          {!selectedPlan && !isLoadingProducts ? (
+            <div className="glass-panel rounded-[32px] p-6 text-sm text-zinc-400">No active plans are available right now. Add cards from the admin dashboard to reopen ordering.</div>
+          ) : null}
+          {selectedPlan ? (
+            <>
+              <div className="glass-panel rounded-[32px] p-6">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/8">
                 <ReceiptIndianRupee className="h-5 w-5 text-fuchsia-200" />
@@ -199,9 +255,10 @@ export function OrderPage() {
                     <span className="text-sm text-zinc-400">Name (optional)</span>
                     <input
                       className="field"
-                      value={profile.name}
+                      value={user?.name || profile.name}
+                      disabled={Boolean(user?.name)}
                       onChange={(event) => setProfile((current) => ({ ...current, name: event.target.value }))}
-                      placeholder="Your name"
+                      placeholder={user?.name || "Your name"}
                     />
                   </label>
                   <label className="space-y-2">
@@ -209,9 +266,10 @@ export function OrderPage() {
                     <input
                       type="email"
                       className="field"
-                      value={profile.email}
+                      value={user?.email || profile.email}
+                      disabled={Boolean(user?.email)}
                       onChange={(event) => setProfile((current) => ({ ...current, email: event.target.value }))}
-                      placeholder="you@example.com"
+                      placeholder={user?.email || "you@example.com"}
                     />
                   </label>
                 </div>
@@ -240,7 +298,7 @@ export function OrderPage() {
                 {error ? <p className="text-sm text-rose-300">{error}</p> : null}
                 <Button
                   type="submit"
-                  disabled={isSubmittingOrder}
+                  disabled={isSubmittingOrder || selectedPlan.isAvailable === false}
                   className="w-full justify-center bg-[linear-gradient(135deg,#ffffff,#f5d0fe_52%,#bae6fd)]"
                 >
                   {isSubmittingOrder ? "Creating order..." : `Continue to payment for ${formatCurrency(selectedPlan.price)}`}
@@ -349,17 +407,19 @@ export function OrderPage() {
             )}
           </div>
 
-          <div className="glass-panel rounded-[28px] p-5">
-            <div className="flex items-center gap-3">
-              <ShieldCheck className="h-5 w-5 text-emerald-300" />
-              <p className="text-sm font-medium text-white">Built-in safeguards</p>
-            </div>
-            <ul className="mt-4 space-y-3 text-sm leading-7 text-zinc-400">
-              <li>Username validation prevents malformed orders.</li>
-              <li>Proof uploads accept only image formats under 5MB.</li>
-              <li>Admin route is restricted to the approved backend admin login.</li>
-            </ul>
-          </div>
+              <div className="glass-panel rounded-[28px] p-5">
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className="h-5 w-5 text-emerald-300" />
+                  <p className="text-sm font-medium text-white">Built-in safeguards</p>
+                </div>
+                <ul className="mt-4 space-y-3 text-sm leading-7 text-zinc-400">
+                  <li>Username validation prevents malformed orders.</li>
+                  <li>Proof uploads accept only image formats under 5MB.</li>
+                  <li>Admin route is restricted to the approved Google account.</li>
+                </ul>
+              </div>
+            </>
+          ) : null}
         </div>
       </div>
     </section>
