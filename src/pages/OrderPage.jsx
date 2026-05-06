@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { motion } from "framer-motion"
-import { ImageUp, ReceiptIndianRupee, ShieldCheck, WalletCards } from "lucide-react"
+import { CheckCheck, Copy, ExternalLink, ImageUp, QrCode, ReceiptIndianRupee, ShieldCheck, WalletCards } from "lucide-react"
 import { useSearchParams } from "react-router-dom"
 import { Button } from "../components/Button"
 import { OrderSuccessAnimation } from "../components/OrderSuccessAnimation"
@@ -40,9 +40,12 @@ export function OrderPage() {
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
   const [completedOrder, setCompletedOrder] = useState(null)
+  const [copiedField, setCopiedField] = useState("")
+  const summaryRef = useRef(null)
 
   function handlePlanSelect(plan) {
     setSearchParams({ plan: plan.id })
+    summaryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
   async function handleCreateOrder(event) {
@@ -107,15 +110,40 @@ export function OrderPage() {
     }
   }
 
-  const upiId = import.meta.env.VITE_UPI_ID || "your-upi-id@bank"
-  const upiName = import.meta.env.VITE_UPI_NAME || "Libra Growth"
+  const upiId = import.meta.env.VITE_UPI_ID || "satousandeep@fam"
+  const upiName = import.meta.env.VITE_UPI_NAME || "Libra"
+  const upiLink = useMemo(() => {
+    const params = new URLSearchParams({
+      pa: upiId,
+      pn: upiName,
+      am: String(selectedPlan.price),
+      cu: "INR",
+      tn: `${selectedPlan.title} - Libra`,
+    })
+
+    return `upi://pay?${params.toString()}`
+  }, [selectedPlan.price, selectedPlan.title, upiId, upiName])
+  const qrUrl = useMemo(
+    () => `https://quickchart.io/qr?size=260&text=${encodeURIComponent(upiLink)}`,
+    [upiLink],
+  )
+
+  async function handleCopy(value, field) {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopiedField(field)
+      window.setTimeout(() => setCopiedField(""), 1400)
+    } catch {
+      setCopiedField("")
+    }
+  }
 
   return (
     <section className="page-shell">
       <SectionHeading
         eyebrow="Place Order"
-        title="Pick a plan, then complete proof-based checkout."
-        copy="Selecting a package auto-fills the service summary. Customers only enter an Instagram username and optional notes before receiving a unique order ID."
+        title="Select, pay, and submit proof in one guided flow."
+        copy="Package selection now drives the entire checkout surface automatically. Once you choose a plan, the payment amount, UPI deep link, and QR are already prepared."
       />
       <div className="mt-10 grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-6">
@@ -125,7 +153,7 @@ export function OrderPage() {
             ))}
           </div>
         </div>
-        <div className="space-y-6">
+        <div ref={summaryRef} className="space-y-6 xl:sticky xl:top-28 xl:self-start">
           <div className="glass-panel rounded-[32px] p-6">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/8">
@@ -134,6 +162,7 @@ export function OrderPage() {
               <div>
                 <p className="section-kicker">Order Summary</p>
                 <h3 className="mt-2 text-2xl font-semibold text-white">{selectedPlan.title}</h3>
+                <p className="mt-1 text-sm text-zinc-500">Auto-updated as soon as you select a package.</p>
               </div>
             </div>
             <div className="mt-5 rounded-[24px] border border-white/10 bg-white/5 p-5">
@@ -146,6 +175,20 @@ export function OrderPage() {
                   <p className="text-sm text-zinc-500">Total price</p>
                   <p className="mt-1 text-3xl font-semibold text-white">{formatCurrency(selectedPlan.price)}</p>
                 </div>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-[22px] border border-white/10 bg-[#0a0f1f] p-4">
+                <p className="text-xs uppercase tracking-[0.22em] text-zinc-500">Receiver</p>
+                <p className="mt-2 text-sm font-semibold text-white">{upiId}</p>
+              </div>
+              <div className="rounded-[22px] border border-white/10 bg-[#0a0f1f] p-4">
+                <p className="text-xs uppercase tracking-[0.22em] text-zinc-500">ETA</p>
+                <p className="mt-2 text-sm font-semibold text-white">{selectedPlan.eta}</p>
+              </div>
+              <div className="rounded-[22px] border border-white/10 bg-[#0a0f1f] p-4">
+                <p className="text-xs uppercase tracking-[0.22em] text-zinc-500">Proof</p>
+                <p className="mt-2 text-sm font-semibold text-white">Txn ID + Screenshot</p>
               </div>
             </div>
 
@@ -195,8 +238,12 @@ export function OrderPage() {
                   />
                 </label>
                 {error ? <p className="text-sm text-rose-300">{error}</p> : null}
-                <Button type="submit" disabled={isSubmittingOrder} className="w-full justify-center">
-                  {isSubmittingOrder ? "Creating order..." : "Generate Order ID"}
+                <Button
+                  type="submit"
+                  disabled={isSubmittingOrder}
+                  className="w-full justify-center bg-[linear-gradient(135deg,#ffffff,#f5d0fe_52%,#bae6fd)]"
+                >
+                  {isSubmittingOrder ? "Creating order..." : `Continue to payment for ${formatCurrency(selectedPlan.price)}`}
                 </Button>
               </form>
             ) : !completedOrder ? (
@@ -208,18 +255,43 @@ export function OrderPage() {
                     Use this Order ID on the tracking page. Complete payment below, then upload the proof screenshot.
                   </p>
                 </div>
-                <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
-                  <div className="flex items-center gap-3">
-                    <WalletCards className="h-5 w-5 text-fuchsia-200" />
-                    <div>
-                      <p className="text-sm text-zinc-500">UPI Payment Instructions</p>
-                      <p className="mt-1 text-lg font-semibold text-white">{upiId}</p>
+                <div className="grid gap-4 rounded-[28px] border border-white/10 bg-white/5 p-5 sm:grid-cols-[220px_1fr]">
+                  <div className="rounded-[22px] border border-white/10 bg-[#080d20] p-4">
+                    <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-zinc-500">
+                      <QrCode className="h-3.5 w-3.5" />
+                      Scan UPI QR
                     </div>
+                    <img src={qrUrl} alt="Libra payment QR" className="mx-auto h-[180px] w-[180px] rounded-xl border border-white/10 bg-white p-1" />
                   </div>
-                  <div className="mt-4 grid gap-3 rounded-[22px] border border-white/10 bg-[#080d20] p-4 text-sm text-zinc-300">
-                    <p>Pay {formatCurrency(selectedPlan.price)} to {upiName}.</p>
-                    <p>Reference your order after payment by submitting the transaction ID.</p>
-                    <p>Upload the payment screenshot for manual verification.</p>
+                  <div className="space-y-4 rounded-[22px] border border-white/10 bg-[#080d20] p-4">
+                    <div className="flex items-center gap-3">
+                      <WalletCards className="h-5 w-5 text-fuchsia-200" />
+                      <div>
+                        <p className="text-sm text-zinc-500">UPI Payment Instructions</p>
+                        <p className="mt-1 text-lg font-semibold text-white">{upiId}</p>
+                      </div>
+                    </div>
+                    <div className="rounded-[18px] border border-white/10 bg-white/5 p-4 text-sm text-zinc-300">
+                      <p>Pay {formatCurrency(selectedPlan.price)} to {upiName}.</p>
+                      <p className="mt-2">Reference your order after payment by submitting the transaction ID.</p>
+                      <p className="mt-2">Upload the payment screenshot for manual verification.</p>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <a href={upiLink} className="inline-flex">
+                        <Button className="gap-2 bg-[linear-gradient(135deg,#ffffff,#f5d0fe_52%,#bae6fd)]">
+                          Open UPI App
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      </a>
+                      <Button variant="secondary" className="gap-2" onClick={() => handleCopy(upiId, "upi")}>
+                        {copiedField === "upi" ? <CheckCheck className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                        {copiedField === "upi" ? "UPI copied" : "Copy UPI ID"}
+                      </Button>
+                      <Button variant="secondary" className="gap-2" onClick={() => handleCopy(String(selectedPlan.price), "amount")}>
+                        {copiedField === "amount" ? <CheckCheck className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                        {copiedField === "amount" ? "Amount copied" : "Copy amount"}
+                      </Button>
+                    </div>
                   </div>
                 </div>
                 <form className="space-y-4" onSubmit={handleSubmitPayment}>
@@ -254,7 +326,11 @@ export function OrderPage() {
                     </div>
                   </label>
                   {paymentError ? <p className="text-sm text-rose-300">{paymentError}</p> : null}
-                  <Button type="submit" disabled={isSubmittingPayment} className="w-full justify-center">
+                  <Button
+                    type="submit"
+                    disabled={isSubmittingPayment}
+                    className="w-full justify-center bg-[linear-gradient(135deg,#ffffff,#f5d0fe_52%,#bae6fd)]"
+                  >
                     {isSubmittingPayment ? "Submitting proof..." : "Submit Payment Proof"}
                   </Button>
                 </form>

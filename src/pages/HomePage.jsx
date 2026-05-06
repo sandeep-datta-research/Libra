@@ -1,8 +1,9 @@
 import { motion } from "framer-motion"
-import { ArrowRight, BadgeCheck, Clock3, LineChart, ShieldCheck, Sparkles } from "lucide-react"
+import { ArrowRight, BadgeCheck, Clock3, LineChart, ShieldCheck, Sparkles, WalletCards } from "lucide-react"
 import { Link } from "react-router-dom"
 import { testimonials, trustStats } from "../data/services"
 import { Button } from "../components/Button"
+import { LogoMark } from "../components/LogoMark"
 import { SectionHeading } from "../components/SectionHeading"
 
 const benefits = [
@@ -34,7 +35,7 @@ export function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               className="section-kicker"
             >
-              Cinematic growth commerce
+              Libra signature experience
             </motion.p>
             <motion.h1
               initial={{ opacity: 0, y: 14 }}
@@ -42,8 +43,8 @@ export function HomePage() {
               transition={{ delay: 0.08 }}
               className="mt-5 max-w-4xl font-display text-6xl leading-none text-white sm:text-7xl lg:text-[5.6rem]"
             >
-              Premium Instagram growth,
-              <span className="text-gradient"> sold like elite software.</span>
+              Growth commerce
+              <span className="text-gradient"> framed like a luxury brand.</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 14 }}
@@ -51,7 +52,7 @@ export function HomePage() {
               transition={{ delay: 0.14 }}
               className="mt-6 max-w-2xl text-lg leading-8 text-zinc-400"
             >
-              Libra is a high-end growth storefront with modern package discovery, order creation, payment proof collection, order tracking, and a protected admin command layer.
+              Libra turns a simple Instagram growth offer into a cinematic buying experience with plan-led conversion, faster UPI checkout, payment proof upload, and a crisp tracking journey.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 14 }}
@@ -59,14 +60,17 @@ export function HomePage() {
               transition={{ delay: 0.2 }}
               className="mt-8 flex flex-wrap gap-4"
             >
-              <Link to="/order">
-                <Button className="gap-2">
-                  Launch an Order
+              <Link to="/order?plan=growth-boost">
+                <Button className="gap-2 bg-[linear-gradient(135deg,#ffffff,#f5d0fe_52%,#bae6fd)]">
+                  Start with Growth Boost
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link to="/services">
-                <Button variant="secondary">Explore Packages</Button>
+                <Button variant="secondary" className="gap-2">
+                  Explore Packages
+                  <Sparkles className="h-4 w-4" />
+                </Button>
               </Link>
             </motion.div>
             <div className="mt-10 grid gap-4 sm:grid-cols-3">
@@ -91,22 +95,21 @@ export function HomePage() {
             className="glass-panel surface-ring relative overflow-hidden rounded-[36px] p-7"
           >
             <div className="premium-grid absolute inset-0" />
+            <div className="absolute -right-6 top-10 h-32 w-32 rounded-full bg-cyan-300/15 blur-3xl" />
             <div className="relative rounded-[28px] border border-white/10 bg-[#090f23]/80 p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="section-kicker">Live conversion flow</p>
-                  <h2 className="mt-4 text-3xl font-semibold text-white">One clean order path</h2>
+                  <h2 className="mt-4 text-3xl font-semibold text-white">One premium payment rail</h2>
                 </div>
-                <span className="rounded-full border border-emerald-200/20 bg-emerald-300/10 px-3 py-1 text-xs uppercase tracking-[0.24em] text-emerald-200">
-                  Ready
-                </span>
+                <LogoMark className="h-14 w-14 shrink-0" />
               </div>
               <div className="mt-7 space-y-4">
                 {[
-                  "Choose package and auto-fill order form",
-                  "Receive unique order ID instantly",
-                  "Complete UPI payment and upload screenshot",
-                  "Track verification and completion from a status page",
+                  "Tap a package and auto-jump into the active order flow",
+                  "Open UPI directly or scan QR with the exact amount prefilled",
+                  "Submit transaction ID and screenshot in the same surface",
+                  "Track verification and completion without messaging support",
                 ].map((step) => (
                   <div key={step} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
                     <BadgeCheck className="h-5 w-5 text-fuchsia-200" />
@@ -114,7 +117,15 @@ export function HomePage() {
                   </div>
                 ))}
               </div>
-              <div className="mt-6 rounded-[24px] border border-white/10 bg-white/5 p-5">
+              <div className="mt-6 grid gap-4 rounded-[24px] border border-white/10 bg-white/5 p-5 sm:grid-cols-[0.75fr_1fr]">
+                <div className="rounded-[22px] border border-white/10 bg-[#0b1021] p-4">
+                  <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-zinc-500">
+                    <WalletCards className="h-3.5 w-3.5" />
+                    UPI target
+                  </div>
+                  <p className="text-lg font-semibold text-white">satousandeep@fam</p>
+                  <p className="mt-2 text-sm leading-6 text-zinc-400">Ready for direct app handoff and QR payment.</p>
+                </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-zinc-500">Featured package</p>
@@ -134,8 +145,8 @@ export function HomePage() {
       <section className="page-shell">
         <SectionHeading
           eyebrow="Why It Converts"
-          title="Designed to reduce hesitation."
-          copy="The product experience leads with trust signals, premium visual framing, and a clearly sequenced delivery workflow."
+          title="Built to remove payment friction."
+          copy="The product experience leads with trust signals, premium visual framing, and a cleaner payment sequence that keeps users moving."
         />
         <div className="mt-10 grid gap-6 lg:grid-cols-3">
           {benefits.map((benefit, index) => {

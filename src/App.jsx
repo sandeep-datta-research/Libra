@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { BrowserRouter, NavLink, Route, Routes, useLocation } from "react-router-dom"
-import { Camera, ShieldCheck, Sparkles } from "lucide-react"
+import { ShieldCheck, Sparkles } from "lucide-react"
 import { HomePage } from "./pages/HomePage"
 import { ServicesPage } from "./pages/ServicesPage"
 import { OrderPage } from "./pages/OrderPage"
@@ -8,6 +8,7 @@ import { TrackOrderPage } from "./pages/TrackOrderPage"
 import { AboutPage } from "./pages/AboutPage"
 import { AdminPage } from "./pages/AdminPage"
 import { ProtectedRoute } from "./components/ProtectedRoute"
+import { LogoMark } from "./components/LogoMark"
 
 const navItems = [
   { to: "/", label: "Home" },
@@ -30,12 +31,10 @@ function AppShell({ children }) {
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#060816]/70 backdrop-blur-2xl">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <NavLink to="/" className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-white/8 shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_18px_40px_rgba(4,8,25,0.55)]">
-              <Camera className="h-5 w-5 text-fuchsia-200" />
-            </div>
+            <LogoMark className="h-11 w-11" />
             <div>
               <p className="font-display text-lg tracking-[0.25em] text-white">LIBRA</p>
-              <p className="text-xs uppercase tracking-[0.34em] text-zinc-500">Instagram Growth Lab</p>
+              <p className="text-xs uppercase tracking-[0.34em] text-zinc-500">Scale-led Growth House</p>
             </div>
           </NavLink>
           <nav className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2 py-2 md:flex">
@@ -57,11 +56,11 @@ function AppShell({ children }) {
             ))}
           </nav>
           <NavLink
-            to="/order"
+            to="/order?plan=growth-boost"
             className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_16px_40px_rgba(255,255,255,0.12)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(255,255,255,0.18)]"
           >
             <Sparkles className="h-4 w-4" />
-            Start Order
+            Start Growth
           </NavLink>
         </div>
       </header>
@@ -71,7 +70,7 @@ function AppShell({ children }) {
           <div className="space-y-3">
             <p className="font-display text-xl text-white">Libra, designed like a luxury product.</p>
             <p className="max-w-2xl leading-7">
-              Libra combines premium presentation, structured delivery, and manual payment verification for a frictionless Instagram growth ordering experience.
+              Libra combines premium presentation, faster payment handoff, and manual verification for an Instagram growth ordering experience that feels deliberate and high-trust.
             </p>
           </div>
           <div className="flex items-start justify-start gap-3 rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl lg:justify-end">
