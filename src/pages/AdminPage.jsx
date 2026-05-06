@@ -512,17 +512,25 @@ export function AdminPage() {
                     <tbody className="divide-y divide-white/8 bg-[#070b18]/70 text-zinc-200">
                       {orders.map((order) => (
                         <tr key={order.id}>
-                          <td className="px-4 py-4 align-top">
-                            <p className="font-semibold text-white">{order.id}</p>
-                            <p className="mt-1 text-zinc-400">@{order.username}</p>
-                            <p className="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">
-                              {formatDate(order.created_at)}
+                        <td className="px-4 py-4 align-top">
+                          <p className="font-semibold text-white">{order.id}</p>
+                          <p className="mt-1 text-zinc-400">@{order.username}</p>
+                          {order.customer_name || order.customer_email ? (
+                            <p className="mt-1 text-xs text-zinc-500">
+                              {[order.customer_name, order.customer_email].filter(Boolean).join(" • ")}
                             </p>
-                          </td>
-                          <td className="px-4 py-4 align-top">
-                            <p>{order.service}</p>
-                            <p className="mt-1 text-xs text-zinc-500">{order.transaction_id || "Awaiting payment proof"}</p>
-                          </td>
+                          ) : null}
+                          <p className="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">
+                            {formatDate(order.created_at)}
+                          </p>
+                        </td>
+                        <td className="px-4 py-4 align-top">
+                          <p>{order.service}</p>
+                          <p className="mt-1 text-xs text-zinc-500">
+                            {order.slot_reserved === false ? "Slot released" : "Slot reserved"}
+                          </p>
+                          <p className="mt-1 text-xs text-zinc-500">{order.transaction_id || "Awaiting payment proof"}</p>
+                        </td>
                           <td className="px-4 py-4 align-top">
                             <StatusPill status={order.status} />
                           </td>

@@ -205,8 +205,11 @@ const orderSchema = new mongoose.Schema(
     service_id: { type: String, default: "" },
     amount: { type: Number, default: 0 },
     notes: { type: String, default: "" },
+    customer_name: { type: String, default: "" },
+    customer_email: { type: String, default: "" },
     transaction_id: { type: String, default: "" },
     screenshot_url: { type: String, default: "" },
+    slot_reserved: { type: Boolean, default: true },
     status: {
       type: String,
       enum: ["Pending", "Verified", "In Progress", "Completed", "Rejected"],
@@ -333,9 +336,12 @@ async function createOrderRecord(record) {
 
   const order = {
     ...record,
+    customer_name: record.customer_name || "",
+    customer_email: record.customer_email || "",
     transaction_id: "",
     screenshot_url: "",
     status: "Pending",
+    slot_reserved: record.slot_reserved !== false,
     created_at: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
@@ -396,6 +402,53 @@ async function updateOrderRecordStatus(orderId, status) {
   order.status = status
   order.updatedAt = new Date().toISOString()
   return order
+}
+
+async function reserveProductSlot(productId) {
+  const product = await findProductById(productId)
+  if (!product || product.isAvailable === false || Number(product.slots || 0) <= 0) {
+    return null
+  }
+
+  if (storageMode === "mongo") {
+    const nextSlots = Math.max(0, Number(product.slots || 0) - 1)
+    const nextValues = {
+      slots: nextSlots,
+      isAvailable: nextSlots > 0,
+      stockLabel:
+        nextSlots > 0
+          ? product.stockLabel === "Out of stock"
+            ? "Available"
+            : product.stockLabel
+          : "Out of stock",
+    }
+    return Product.findOneAndUpdate({ id: productId }, nextValues, { new: true })
+  }
+
+  product.slots = Math.max(0, Number(product.slots || 0) - 1)
+  product.isAvailable = product.slots > 0
+  product.stockLabel = product.slots > 0 ? (product.stockLabel === "Out of stock" ? "Available" : product.stockLabel) : "Out of stock"
+  return product
+}
+
+async function releaseProductSlot(productId) {
+  const product = await findProductById(productId)
+  if (!product) return null
+
+  if (storageMode === "mongo") {
+    const nextSlots = Math.max(0, Number(product.slots || 0) + 1)
+    const nextValues = {
+      slots: nextSlots,
+      isAvailable: true,
+      stockLabel: product.stockLabel === "Out of stock" ? "Available" : product.stockLabel,
+    }
+    return Product.findOneAndUpdate({ id: productId }, nextValues, { new: true })
+  }
+
+  product.slots = Math.max(0, Number(product.slots || 0) + 1)
+  product.isAvailable = true
+  product.stockLabel = product.stockLabel === "Out of stock" ? "Available" : product.stockLabel
+  return product
 }
 
 async function getCapacityValue() {
@@ -503,19 +556,33 @@ app.post("/api/orders", async (req, res) => {
     orderId = createOrderId()
   }
 
-  const order = await createOrderRecord({
-    id: orderId,
-    username: username.trim(),
-    service: `${product.title} • Rs ${product.price}`,
-    service_id: product.id,
-    amount: product.price,
-    notes: `${notes}`.trim(),
-    user_email: `${userEmail}`.trim().toLowerCase(),
-    user_name: `${userName}`.trim(),
-    user_picture: `${userPicture}`.trim(),
-  })
+  const reservedProduct = await reserveProductSlot(product.id)
+  if (!reservedProduct) {
+    res.status(400).json({ message: "This card just went out of stock. Refresh and choose another package." })
+    return
+  }
 
-  res.status(201).json({ order })
+  try {
+    const order = await createOrderRecord({
+      id: orderId,
+      username: username.trim(),
+      service: `${product.title} • Rs ${product.price}`,
+      service_id: product.id,
+      amount: product.price,
+      notes: `${notes}`.trim(),
+      customer_name: `${userName}`.trim(),
+      customer_email: `${userEmail}`.trim().toLowerCase(),
+      user_email: `${userEmail}`.trim().toLowerCase(),
+      user_name: `${userName}`.trim(),
+      user_picture: `${userPicture}`.trim(),
+      slot_reserved: true,
+    })
+
+    res.status(201).json({ order })
+  } catch (error) {
+    await releaseProductSlot(product.id)
+    throw error
+  }
 })
 
 app.patch("/api/orders/:orderId/payment", upload.single("screenshot"), async (req, res) => {
@@ -576,10 +643,30 @@ app.patch("/api/admin/orders/:orderId/status", requireAdmin, async (req, res) =>
     return
   }
 
-  const order = await updateOrderRecordStatus(req.params.orderId, status)
+  const existingOrder = await findOrderById(req.params.orderId)
+  if (!existingOrder) {
+    res.status(404).json({ message: "Order not found." })
+    return
+  }
+
+  let order = await updateOrderRecordStatus(req.params.orderId, status)
   if (!order) {
     res.status(404).json({ message: "Order not found." })
     return
+  }
+
+  if (status === "Rejected" && existingOrder.slot_reserved !== false && existingOrder.service_id) {
+    await releaseProductSlot(existingOrder.service_id)
+
+    if (storageMode === "mongo") {
+      order = await Order.findOneAndUpdate({ id: req.params.orderId }, { slot_reserved: false }, { new: true })
+    } else {
+      const localOrder = memoryStore.orders.find((row) => row.id === req.params.orderId)
+      if (localOrder) {
+        localOrder.slot_reserved = false
+        order = localOrder
+      }
+    }
   }
 
   res.json({ order })

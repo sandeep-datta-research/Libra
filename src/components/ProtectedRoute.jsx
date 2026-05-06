@@ -41,7 +41,7 @@ export function ProtectedRoute({ children }) {
             width={360}
             onCredential={async (credential) => {
               const nextUser = await loginWithGoogle(credential)
-              if (nextUser.email !== adminEmail || nextUser.role !== "admin") {
+              if (`${nextUser.role || ""}`.trim().toLowerCase() !== "admin") {
                 throw new Error(`Sign in with ${adminEmail} to access the admin dashboard.`)
               }
             }}
