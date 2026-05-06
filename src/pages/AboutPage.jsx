@@ -9,7 +9,7 @@ const trustPillars = [
   },
   {
     title: "Protected operator access",
-    copy: "The admin surface is shielded behind a passkey gate for basic route-level access control.",
+    copy: "The admin surface is restricted to the approved Supabase admin email instead of a client-side passkey.",
     icon: Lock,
   },
   {

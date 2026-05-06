@@ -6,11 +6,11 @@ import { SkeletonCard } from "../components/SkeletonCard"
 import { StatusPill } from "../components/StatusPill"
 import { statusOptions } from "../data/services"
 import { useAdminAuth } from "../hooks/useAdminAuth"
-import { getCapacity, listOrders, updateCapacity, updateOrderStatus } from "../lib/orders"
+import { getCapacity, getScreenshotUrl, listOrders, updateCapacity, updateOrderStatus } from "../lib/orders"
 import { formatDate } from "../lib/utils"
 
 export function AdminPage() {
-  const { logout } = useAdminAuth()
+  const { adminEmail, logout, user } = useAdminAuth()
   const [statusFilter, setStatusFilter] = useState("All")
   const [orders, setOrders] = useState([])
   const [capacity, setCapacityState] = useState(24)
@@ -76,6 +76,17 @@ export function AdminPage() {
     setIsSavingCapacity(false)
   }
 
+  async function handleOpenScreenshot(path) {
+    try {
+      const url = await getScreenshotUrl(path)
+      if (url) {
+        window.open(url, "_blank", "noopener,noreferrer")
+      }
+    } catch (openError) {
+      setError(openError.message || "Failed to open screenshot.")
+    }
+  }
+
   return (
     <section className="page-shell">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -94,6 +105,10 @@ export function AdminPage() {
             Logout
           </Button>
         </div>
+      </div>
+
+      <div className="mt-6 rounded-[28px] border border-white/10 bg-white/5 px-5 py-4 text-sm text-zinc-300">
+        Logged in as <span className="font-semibold text-white">{user?.email || adminEmail}</span>
       </div>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[0.35fr_0.65fr]">
@@ -180,14 +195,13 @@ export function AdminPage() {
                         </td>
                         <td className="px-4 py-4 align-top">
                           {order.screenshot_url ? (
-                            <a
-                              href={order.screenshot_url}
-                              target="_blank"
-                              rel="noreferrer"
+                            <button
+                              type="button"
+                              onClick={() => handleOpenScreenshot(order.screenshot_url)}
                               className="text-fuchsia-200 underline decoration-white/20 underline-offset-4"
                             >
                               View screenshot
-                            </a>
+                            </button>
                           ) : (
                             <span className="text-zinc-500">No upload yet</span>
                           )}

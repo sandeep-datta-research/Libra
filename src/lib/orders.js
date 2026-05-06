@@ -80,8 +80,7 @@ export async function submitPaymentProof({ orderId, transactionId, screenshotFil
 
     if (uploadError) throw uploadError
 
-    const { data } = supabase.storage.from(storageBucket).getPublicUrl(path)
-    screenshotUrl = data.publicUrl
+    screenshotUrl = path
   } else {
     screenshotUrl = await fileToDataUrl(screenshotFile)
   }
@@ -110,6 +109,18 @@ export async function submitPaymentProof({ orderId, transactionId, screenshotFil
 
   if (error) throw error
   return data
+}
+
+export async function getScreenshotUrl(path) {
+  if (!path) return ""
+
+  if (!isSupabaseConfigured || path.startsWith("data:") || path.startsWith("http")) {
+    return path
+  }
+
+  const { data, error } = await supabase.storage.from(storageBucket).createSignedUrl(path, 60 * 30)
+  if (error) throw error
+  return data.signedUrl
 }
 
 export async function trackOrder(orderId) {
